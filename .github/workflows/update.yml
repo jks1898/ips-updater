@@ -1,4 +1,4 @@
-name: Update CT IPs
+name: Update CT api.txt
 
 on:
   schedule:
@@ -33,14 +33,14 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run IP collection script
-        run: python collect_ips.py
+        run: python collect_api.py  # 运行 collect_api.py
 
-      - name: Commit and push ips.txt if changed
+      - name: Commit and push api.txt if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git diff --exit-code ips.txt || (
-            git add ips.txt
-            git commit -m "Update CT IPs"
+          git diff --exit-code api.txt || (
+            git add api.txt
+            git commit -m "Update CT api.txt"
             git push
           )
