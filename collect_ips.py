@@ -1,39 +1,24 @@
 import requests
 from bs4 import BeautifulSoup
+import re
 
 URL = "https://www.wetest.vip/page/cloudflare/total_v4.html"
 OUTPUT = "ips.txt"
 
 # 请求网页
-resp = requests.get(URL)
+resp = requests.get(URL, timeout=10)
 resp.encoding = resp.apparent_encoding
 soup = BeautifulSoup(resp.text, "html.parser")
 
-# 提取表格数据
-lines = soup.get_text().splitlines()
-data = []
-
-for line in lines:
-    line = line.strip()
-    if not line or line.startswith("优选地址") or "毫秒" not in line:
-        continue
-    parts = line.split()
-    if len(parts) < 4:
-        continue
-    ip = parts[0]
-    latency_str = parts[3]  # 电信延迟(节点)
-    try:
-        # 提取数值
-        latency = int(latency_str.replace("毫秒(SIN)", ""))
-        data.append((ip, latency))
-    except:
-        continue
+# 正则匹配电信延迟
+# 匹配形式：IP ... 电信 ... 数字毫秒
+pattern = re.compile(r"(\d+\.\d+\.\d+\.\d+).*?电信.*?(\d+)毫秒")
+data = [(m.group(1), int(m.group(2))) for m in pattern.finditer(soup.get_text())]
 
 # 按电信延迟升序排序，取前6个
-data.sort(key=lambda x: x[1])
-top6 = data[:6]
+top6 = sorted(data, key=lambda x: x[1])[:6]
 
-# 写入 ips.txt，备注为 CT
+# 写入 ips.txt，备注 CT
 with open(OUTPUT, "w") as f:
     for ip, _ in top6:
         f.write(f"{ip}#CT\n")
