@@ -25,7 +25,6 @@ with open(OUTPUT, "w") as f:
         f.write(f"{ip}#CT\n")
 
 # 打印前6条供验证
+print("📌 前6个电信延迟 IP:")
 for ip, latency in top6:
     print(f"{ip} - {latency}ms")
-
-print(f"✅ 已写入前6个电信延迟 IP 到 {OUTPUT}")
