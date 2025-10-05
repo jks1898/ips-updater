@@ -1,29 +1,41 @@
 import requests
+from bs4 import BeautifulSoup
 
-API_URL = "https://cfcdn.api.urlce.com/total_v4.json"
-OUTPUT_FILE = "ips.txt"
+URL = "https://www.wetest.vip/page/cloudflare/total_v4.html"
+OUTPUT = "ips.txt"
 
-# 发送 GET 请求获取 JSON 数据
-response = requests.get(API_URL)
-response.raise_for_status()  # 如果请求失败，抛出异常
+# 请求网页
+resp = requests.get(URL)
+resp.encoding = resp.apparent_encoding
+soup = BeautifulSoup(resp.text, "html.parser")
 
-# 解析 JSON 数据
-data = response.json()
+# 提取表格数据
+lines = soup.get_text().splitlines()
+data = []
 
-# 筛选电信延迟数据并排序
-filtered_data = [
-    (item["ip"], item["latency"])
-    for item in data
-    if item["isp"] == "电信" and item["latency"] is not None
-]
-sorted_data = sorted(filtered_data, key=lambda x: x[1])
+for line in lines:
+    line = line.strip()
+    if not line or line.startswith("优选地址") or "毫秒" not in line:
+        continue
+    parts = line.split()
+    if len(parts) < 4:
+        continue
+    ip = parts[0]
+    latency_str = parts[3]  # 电信延迟(节点)
+    try:
+        # 提取数值
+        latency = int(latency_str.replace("毫秒(SIN)", ""))
+        data.append((ip, latency))
+    except:
+        continue
 
-# 获取前 6 个 IP
-top_6_ips = sorted_data[:6]
+# 按电信延迟升序排序，取前6个
+data.sort(key=lambda x: x[1])
+top6 = data[:6]
 
-# 写入文件
-with open(OUTPUT_FILE, "w") as file:
-    for ip, _ in top_6_ips:
-        file.write(f"{ip}#CT\n")
+# 写入 ips.txt，备注为 CT
+with open(OUTPUT, "w") as f:
+    for ip, _ in top6:
+        f.write(f"{ip}#CT\n")
 
-print(f"✅ 已成功获取并写入前 6 个电信延迟 IP 到 {OUTPUT_FILE}")
+print(f"✅ 已写入前6个电信延迟 IP 到 {OUTPUT}")
