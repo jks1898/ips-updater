@@ -8,7 +8,7 @@ CANDIDATES = [
 ]
 TOP_N = 6
 TRIES = 3
-MAX_AVG_LATENCY = 30  # ms
+MAX_AVG_LATENCY = 50  # ms
 
 def tcp_latency(ip, port=443):
     """TCP ping 测平均延迟"""
