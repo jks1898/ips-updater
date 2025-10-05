@@ -1,23 +1,18 @@
-import requests, re, time, socket, concurrent.futures, os
+import requests, socket, concurrent.futures, os, time, random
 
 # ---------- 配置 ----------
-WETEST_URL = "https://www.wetest.vip/page/cloudflare/total_v4.html"
 OUTPUT_FILE = "hk_ips.txt"
-IPINFO_TOKEN = os.getenv("IPINFO_TOKEN", "")  # GitHub Secrets 或本地环境
-MAX_THREADS = 10       # 并发线程数
-PING_TIMEOUT = 1       # TCP 超时（秒）
-PING_TRIES = 3         # 每个 IP 测试次数
+IPINFO_TOKEN = os.getenv("IPINFO_TOKEN", "652658c50a1b7f")  # 从 Secrets 或本地环境
+MAX_THREADS = 10       # 并发线程
+PING_TIMEOUT = 2       # TCP 超时（秒）
+PING_TRIES = 2         # 测试次数
 TOP_N = 10             # 输出前 N 个延迟最低 IP
 
-# ---------- 获取候选 IP ----------
-try:
-    headers = {"User-Agent": "Mozilla/5.0"}
-    resp = requests.get(WETEST_URL, headers=headers, timeout=10)
-    ips = list(set(re.findall(r'\b\d{1,3}(?:\.\d{1,3}){3}\b', resp.text)))
-    print(f"抓取到候选 IP 数量: {len(ips)}")
-except Exception as e:
-    print(f"获取候选 IP 失败: {e}")
-    ips = []
+# 固定香港 Cloudflare IP 段（备用源）
+HK_IPS = [
+    "104.16.0.0", "104.16.1.0", "104.18.0.0", "104.18.1.0",
+    "162.159.0.0", "162.159.1.0", "172.64.0.0", "172.64.1.0"
+]
 
 # ---------- 获取地理位置 ----------
 def get_country(ip):
@@ -59,10 +54,12 @@ def process(ip):
         return (ip, country, region, city, avg)
     return None
 
+# ---------- 主逻辑 ----------
+print(f"候选香港 IP 数量: {len(HK_IPS)}")
 with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_THREADS) as ex:
-    results = list(filter(None, ex.map(process, ips)))
+    results = list(filter(None, ex.map(process, HK_IPS)))
 
-# ---------- 输出前 N 个 ----------
+# 输出前 N 个
 results.sort(key=lambda x: x[4])
 top_n = results[:TOP_N]
 
