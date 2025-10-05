@@ -2,7 +2,7 @@ import requests
 import re
 
 URL = "https://www.wetest.vip/page/cloudflare/total_v4.html"
-OUTPUT = "ips.txt"
+OUTPUT = "api.txt"  # 改为 api.txt
 
 # 请求网页
 resp = requests.get(URL, timeout=10, headers={
@@ -19,7 +19,7 @@ matches = pattern.findall(text)
 data = [(ip, int(latency)) for ip, latency in matches]
 top6 = sorted(data, key=lambda x: x[1])[:6]
 
-# 写入 ips.txt，备注 CT
+# 写入 api.txt，备注 CT
 with open(OUTPUT, "w") as f:
     for ip, _ in top6:
         f.write(f"{ip}#CT\n")
