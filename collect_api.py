@@ -23,8 +23,3 @@ top6 = sorted(data, key=lambda x: x[1])[:6]
 with open(OUTPUT, "w") as f:
     for ip, _ in top6:
         f.write(f"{ip}#CT\n")
-
-# 打印前6条供验证
-print("📌 前6个电信延迟 IP:")
-for ip, latency in top6:
-    print(f"{ip} - {latency}ms")
