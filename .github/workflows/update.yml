@@ -1,4 +1,4 @@
-name: Update HK IPs
+name: Update IPs
 
 on:
   schedule:
@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run HK IP Collector
-        run: python collect_hk_ips.py
+      - name: Run IP Collector
+        run: python collect_ips.py
       - name: Commit and Push
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add hk_ips.txt
-          git commit -m "Auto update HK IPs $(date '+%Y-%m-%d %H:%M')" || echo "No changes"
+          git add ips.txt
+          git commit -m "Auto update IPs $(date '+%Y-%m-%d %H:%M')" || echo "No changes"
           git push
