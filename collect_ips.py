@@ -9,29 +9,33 @@ resp = requests.get(URL)
 resp.encoding = resp.apparent_encoding
 soup = BeautifulSoup(resp.text, "html.parser")
 
-# 找到统计优选列表的表格
+# 提取表格数据
 lines = soup.get_text().splitlines()
 data = []
 
 for line in lines:
-    if "毫秒(SIN)" in line:  # 电信延迟节点标识
-        parts = line.split()
-        ip = parts[0]
-        # 电信延迟一般在第三列
-        try:
-            latency_str = [p for p in parts if "毫秒(SIN)" in p][0]
-            latency = int(latency_str.replace("毫秒(SIN)", ""))
-            data.append((ip, latency))
-        except:
-            continue
+    line = line.strip()
+    if not line or line.startswith("优选地址") or "毫秒" not in line:
+        continue
+    parts = line.split()
+    if len(parts) < 4:
+        continue
+    ip = parts[0]
+    latency_str = parts[3]  # 电信延迟(节点)
+    try:
+        # 提取数值
+        latency = int(latency_str.replace("毫秒(SIN)", ""))
+        data.append((ip, latency))
+    except:
+        continue
 
-# 按电信延迟升序排序，取前5个
+# 按电信延迟升序排序，取前6个
 data.sort(key=lambda x: x[1])
-top5 = data[:5]
+top6 = data[:6]
 
-# 写入 ips.txt
+# 写入 ips.txt，备注为 CT
 with open(OUTPUT, "w") as f:
-    for ip, _ in top5:
+    for ip, _ in top6:
         f.write(f"{ip}#CT\n")
 
-print(f"✅ 已写入前5个电信延迟 IP 到 {OUTPUT}")
+print(f"✅ 已写入前6个电信延迟 IP 到 {OUTPUT}")
