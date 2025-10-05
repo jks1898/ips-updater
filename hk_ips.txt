@@ -1,0 +1,2 @@
+# 优选香港IP（前10个最低延迟）
+# ip	country	region	city	avg_ms
