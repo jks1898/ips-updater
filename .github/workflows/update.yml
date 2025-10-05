@@ -2,27 +2,16 @@ name: Update HK IPs
 
 on:
   schedule:
-    - cron: '0 */2 * * *'   # 每2小时执行
+    - cron: '0 */2 * * *'  # 每两小时运行
   workflow_dispatch:
 
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run IP Collector
+      - uses: actions/checkout@v4
+      - name: Run HK IP Collector
         run: python collect_hk_ips.py
-
       - name: Commit and Push
         run: |
           git config user.name "github-actions"
