@@ -1,15 +1,22 @@
-name: Update IPs
+name: Update HK IPs
 
 on:
   schedule:
-    - cron: '0 */2 * * *'  # 每两小时运行
+    - cron: '0 */2 * * *'  # 每两小时运行一次
   workflow_dispatch:
 
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: pip install --upgrade pip
       - name: Run IP Collector
         run: python collect_ips.py
       - name: Commit and Push
@@ -17,5 +24,5 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add ips.txt
-          git commit -m "Auto update IPs $(date '+%Y-%m-%d %H:%M')" || echo "No changes"
+          git commit -m "Auto update HK IPs $(date '+%Y-%m-%d %H:%M')" || echo "No changes"
           git push
