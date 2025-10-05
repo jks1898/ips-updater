@@ -3,11 +3,11 @@ import requests, re, time, socket, concurrent.futures, os
 # ---------- 配置 ----------
 WETEST_URL = "https://www.wetest.vip/page/cloudflare/total_v4.html"
 OUTPUT_FILE = "hk_ips.txt"
-IPINFO_TOKEN = os.getenv("IPINFO_TOKEN", "")  # 从 GitHub Secrets 或本地环境读取
-MAX_THREADS = 10          # 并发线程
-PING_TIMEOUT = 1          # TCP 443 超时（秒）
-PING_TRIES = 3            # 测速尝试次数
-TOP_N = 10                # 输出前 N 个延迟最低 IP
+IPINFO_TOKEN = os.getenv("IPINFO_TOKEN", "")  # GitHub Secrets 或本地环境
+MAX_THREADS = 10       # 并发线程数
+PING_TIMEOUT = 1       # TCP 超时（秒）
+PING_TRIES = 3         # 每个 IP 测试次数
+TOP_N = 10             # 输出前 N 个延迟最低 IP
 
 # ---------- 获取候选 IP ----------
 try:
@@ -26,7 +26,6 @@ def get_country(ip):
         url += f"?token={IPINFO_TOKEN}"
     try:
         data = requests.get(url, timeout=3).text
-        # lite 模式返回 JSON-like 简化字符串，手动解析
         country = re.search(r'"country": ?"(\w+)"', data)
         region = re.search(r'"region": ?"([^"]+)"', data)
         city = re.search(r'"city": ?"([^"]+)"', data)
