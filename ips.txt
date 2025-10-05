@@ -1,12 +1,12 @@
-# 优选香港IP（前10个最低延迟）
-# ip	country	region	city	avg_ms
-162.159.0.0	HK	Hong Kong	-	-
-104.16.0.0	HK	Hong Kong	-	-
-162.159.1.0	HK	Hong Kong	-	-
-104.18.1.0	HK	Hong Kong	-	-
-172.64.0.0	HK	Hong Kong	-	-
-162.159.2.0	HK	Hong Kong	-	-
-172.65.0.0	HK	Hong Kong	-	-
-104.17.0.0	HK	Hong Kong	-	-
-172.64.1.0	HK	Hong Kong	-	-
-104.17.1.0	HK	Hong Kong	-	-
+104.16.0.0	HK
+104.16.1.0	HK
+104.18.0.0	HK
+104.18.1.0	HK
+162.159.0.0	HK
+162.159.1.0	HK
+172.64.0.0	HK
+172.64.1.0	HK
+104.17.0.0	HK
+104.17.1.0	HK
+162.159.2.0	HK
+172.65.0.0	HK
