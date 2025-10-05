@@ -10,6 +10,6 @@ IP_LIST = [
 
 with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
     for ip in IP_LIST:
-        f.write(f"{ip}\tHK\n")
+        f.write(f"{ip}#HK\n")  # 直接紧跟#HK
 
 print(f"✅ 已生成 {OUTPUT_FILE}，共 {len(IP_LIST)} 个 IP")
