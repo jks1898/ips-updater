@@ -2,7 +2,15 @@ import requests
 import re
 
 URL = "https://www.wetest.vip/page/cloudflare/total_v4.html"
-OUTPUT = "api.txt"  # 改为 api.txt
+OUTPUT = "api.txt"
+
+# 固定前四优选
+fixed_ips = [
+    "101.32.12.79#官方优选",
+    "8.218.189.27#官方优选",
+    "cf.877774.xyz#官方优选",
+    "cf.090227.xyz#官方优选"
+]
 
 # 请求网页
 resp = requests.get(URL, timeout=10, headers={
@@ -11,7 +19,7 @@ resp = requests.get(URL, timeout=10, headers={
 resp.encoding = resp.apparent_encoding
 text = resp.text
 
-# 正则匹配 IP + 电信延迟(节点)，跨行匹配
+# 正则匹配 IP + 电信延迟(节点)
 pattern = re.compile(r"(\d{1,3}(?:\.\d{1,3}){3}).*?电信.*?(\d+)\s*毫秒", re.S)
 matches = pattern.findall(text)
 
@@ -19,7 +27,10 @@ matches = pattern.findall(text)
 data = [(ip, int(latency)) for ip, latency in matches]
 top6 = sorted(data, key=lambda x: x[1])[:6]
 
-# 写入 api.txt，备注 CT
+# 构建最终列表
+final_list = fixed_ips + [f"{ip}#官方优选" for ip, _ in top6]
+
+# 写入文件
 with open(OUTPUT, "w") as f:
-    for ip, _ in top6:
-        f.write(f"{ip}#CT\n")
+    for line in final_list:
+        f.write(line + "\n")
