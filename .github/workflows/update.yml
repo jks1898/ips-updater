@@ -1,4 +1,4 @@
-name: Update CT api.txt
+name: Update api.txt
 
 on:
   schedule:
