@@ -16,23 +16,28 @@ resp_164746 = requests.get(URL_164746, timeout=10, headers={
 resp_164746.encoding = resp_164746.apparent_encoding
 text_164746 = resp_164746.text
 
-# 匹配每行包含 † 的 IP 信息
-lines = re.findall(r"【\d+†(\d{1,3}(?:\.\d{1,3}){3})†.*?】\s+.*", text_164746)
+# 匹配所有行包含 IP 的行
+lines = text_164746.splitlines()
 data_164746 = []
-for line in lines:
-    ip_match = re.search(r"†(\d{1,3}(?:\.\d{1,3}){3})†", line)
-    if not ip_match:
-        continue
-    ip = ip_match.group(1)
-    # 倒数第二列是平均延迟
-    parts = line.split()
-    if len(parts) >= 2:
-        try:
-            latency = float(parts[-2])
-            data_164746.append((ip, latency))
-        except:
-            continue
 
+for line in lines:
+    line = line.strip()
+    if not line:
+        continue
+    # 去掉前面的★和空格
+    line = line.lstrip('★').strip()
+    # 按空格分割列
+    parts = re.split(r'\s+', line)
+    if len(parts) < 4:
+        continue
+    ip = parts[0]
+    try:
+        latency = float(parts[3])
+        data_164746.append((ip, latency))
+    except:
+        continue
+
+# 排序取前4
 top4_164746 = sorted(data_164746, key=lambda x: x[1])[:4]
 top4_list = [f"{ip}#官方优选" for ip, _ in top4_164746]
 
