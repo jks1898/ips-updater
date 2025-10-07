@@ -1,4 +1,6 @@
 import requests
+from bs4 import BeautifulSoup
+import re
 
 URL_164746 = "https://ip.164746.xyz/"
 URL_WETEST = "https://www.wetest.vip/page/cloudflare/total_v4.html"
@@ -13,24 +15,20 @@ resp_164746 = requests.get(URL_164746, timeout=10, headers={
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 })
 resp_164746.encoding = resp_164746.apparent_encoding
-text_164746 = resp_164746.text
+soup = BeautifulSoup(resp_164746.text, "html.parser")
 
 data_164746 = []
-for line in text_164746.splitlines():
-    line = line.strip()
-    if not line or line.startswith("IP地址"):  # 跳过空行和表头
+for row in soup.select("table tr")[1:]:  # 跳过表头
+    cols = row.find_all("td")
+    if len(cols) < 5:
         continue
-    line = line.lstrip("★").strip()  # 去掉★符号
-    parts = line.split()
-    if len(parts) >= 5:
-        ip = parts[0]
-        try:
-            latency = float(parts[4])  # 平均延迟列
-            data_164746.append((ip, latency))
-        except:
-            continue
+    ip = cols[0].text.strip()
+    try:
+        latency = float(cols[4].text.strip())
+        data_164746.append((ip, latency))
+    except:
+        continue
 
-# 排序取前4
 top4_164746 = sorted(data_164746, key=lambda x: x[1])[:4]
 top4_list = [f"{ip}#官方优选" for ip, _ in top4_164746]
 
@@ -41,14 +39,10 @@ resp_wetest = requests.get(URL_WETEST, timeout=10, headers={
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 })
 resp_wetest.encoding = resp_wetest.apparent_encoding
-text_wetest = resp_wetest.text
-
-import re
 pattern_wetest = re.compile(r"(\d{1,3}(?:\.\d{1,3}){3}).*?电信.*?(\d+)\s*毫秒", re.S)
-matches_wetest = pattern_wetest.findall(text_wetest)
+matches_wetest = pattern_wetest.findall(resp_wetest.text)
 data_wetest = [(ip, int(latency)) for ip, latency in matches_wetest]
 
-# 排序并排除已在 top4 的 IP
 top_wetest_filtered = [f"{ip}#官方优选" for ip, _ in sorted(data_wetest, key=lambda x: x[1])
                        if ip not in [ip for ip, _ in top4_164746]]
 top5_wetest = top_wetest_filtered[:5]
@@ -56,8 +50,7 @@ top5_wetest = top_wetest_filtered[:5]
 # -----------------------------
 # 3. 合并前9 + 特殊 IP
 # -----------------------------
-final_list = top4_list + top5_wetest
-final_list.append(special_ip)
+final_list = top4_list + top5_wetest + [special_ip]
 
 # -----------------------------
 # 4. 写入文件
