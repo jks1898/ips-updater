@@ -4,12 +4,10 @@ import re
 URL = "https://www.wetest.vip/page/cloudflare/total_v4.html"
 OUTPUT = "api.txt"
 
-# 固定前四优选
+# 固定优选（调整顺序）
 fixed_ips = [
-    "101.32.12.79#官方优选",
-    "8.218.189.27#官方优选",
-    "cf.877774.xyz#官方优选",
-    "cf.090227.xyz#官方优选"
+    "cf.090227.xyz#官方优选",
+    "cf.877774.xyz#官方优选"
 ]
 
 # 请求网页
