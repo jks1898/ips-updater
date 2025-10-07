@@ -1,5 +1,4 @@
 import requests
-import re
 
 URL_164746 = "https://ip.164746.xyz/"
 URL_WETEST = "https://www.wetest.vip/page/cloudflare/total_v4.html"
@@ -16,14 +15,20 @@ resp_164746 = requests.get(URL_164746, timeout=10, headers={
 resp_164746.encoding = resp_164746.apparent_encoding
 text_164746 = resp_164746.text
 
-# 正则匹配 IP 和平均延迟
-pattern_164746 = re.compile(r"★?\s*(\d{1,3}(?:\.\d{1,3}){3})\s+\d+\s+\d+\s+[\d\.]+")
-pattern_latency = re.compile(r"★?\s*\d{1,3}(?:\.\d{1,3}){3}\s+\d+\s+\d+\s+([\d\.]+)")
-
-ips = pattern_164746.findall(text_164746)
-latencies = pattern_latency.findall(text_164746)
-
-data_164746 = [(ip, float(lat)) for ip, lat in zip(ips, latencies)]
+data_164746 = []
+for line in text_164746.splitlines():
+    line = line.strip()
+    if not line or line.startswith("IP地址"):  # 跳过空行和表头
+        continue
+    line = line.lstrip("★").strip()  # 去掉★符号
+    parts = line.split()
+    if len(parts) >= 5:
+        ip = parts[0]
+        try:
+            latency = float(parts[4])  # 平均延迟列
+            data_164746.append((ip, latency))
+        except:
+            continue
 
 # 排序取前4
 top4_164746 = sorted(data_164746, key=lambda x: x[1])[:4]
@@ -38,6 +43,7 @@ resp_wetest = requests.get(URL_WETEST, timeout=10, headers={
 resp_wetest.encoding = resp_wetest.apparent_encoding
 text_wetest = resp_wetest.text
 
+import re
 pattern_wetest = re.compile(r"(\d{1,3}(?:\.\d{1,3}){3}).*?电信.*?(\d+)\s*毫秒", re.S)
 matches_wetest = pattern_wetest.findall(text_wetest)
 data_wetest = [(ip, int(latency)) for ip, latency in matches_wetest]
