@@ -16,26 +16,14 @@ resp_164746 = requests.get(URL_164746, timeout=10, headers={
 resp_164746.encoding = resp_164746.apparent_encoding
 text_164746 = resp_164746.text
 
-# 匹配所有行包含 IP 的行
-lines = text_164746.splitlines()
-data_164746 = []
+# 正则匹配 IP 和平均延迟
+pattern_164746 = re.compile(r"★?\s*(\d{1,3}(?:\.\d{1,3}){3})\s+\d+\s+\d+\s+[\d\.]+")
+pattern_latency = re.compile(r"★?\s*\d{1,3}(?:\.\d{1,3}){3}\s+\d+\s+\d+\s+([\d\.]+)")
 
-for line in lines:
-    line = line.strip()
-    if not line:
-        continue
-    # 去掉前面的★和空格
-    line = line.lstrip('★').strip()
-    # 按空格分割列
-    parts = re.split(r'\s+', line)
-    if len(parts) < 4:
-        continue
-    ip = parts[0]
-    try:
-        latency = float(parts[3])
-        data_164746.append((ip, latency))
-    except:
-        continue
+ips = pattern_164746.findall(text_164746)
+latencies = pattern_latency.findall(text_164746)
+
+data_164746 = [(ip, float(lat)) for ip, lat in zip(ips, latencies)]
 
 # 排序取前4
 top4_164746 = sorted(data_164746, key=lambda x: x[1])[:4]
@@ -55,7 +43,8 @@ matches_wetest = pattern_wetest.findall(text_wetest)
 data_wetest = [(ip, int(latency)) for ip, latency in matches_wetest]
 
 # 排序并排除已在 top4 的 IP
-top_wetest_filtered = [f"{ip}#官方优选" for ip, _ in sorted(data_wetest, key=lambda x: x[1]) if ip not in [ip for ip, _ in top4_164746]]
+top_wetest_filtered = [f"{ip}#官方优选" for ip, _ in sorted(data_wetest, key=lambda x: x[1])
+                       if ip not in [ip for ip, _ in top4_164746]]
 top5_wetest = top_wetest_filtered[:5]
 
 # -----------------------------
