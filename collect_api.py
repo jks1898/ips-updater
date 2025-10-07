@@ -22,7 +22,9 @@ for row in soup.select("table tr")[1:]:  # 跳过表头
     cols = row.find_all("td")
     if len(cols) < 5:
         continue
-    ip = cols[0].text.strip().lstrip("★")  # 去掉可能的★符号
+    ip = cols[0].text.strip().lstrip("★").strip()
+    if not ip:
+        continue
     try:
         latency = float(cols[4].text.strip())
         data_164746.append((ip, latency))
