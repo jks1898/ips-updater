@@ -40,15 +40,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout main
-          
-          # 拉取最新改动并 rebase 避免冲突
+
+          # 暂存 api.txt 改动，防止 pull 出错
+          git add api.txt
+          git stash push -m "temp" || true
           git pull --rebase origin main
-          
-          # 检查 api.txt 是否有变动
+          git stash pop || true
+
+          # 如果 api.txt 有变化，则提交
           if ! git diff --quiet api.txt; then
             git add api.txt
             git commit -m "Update CT api.txt"
-            
             # 自动处理可能的 push 冲突
             git push origin main || git push origin HEAD:main --force-with-lease
-          fi
