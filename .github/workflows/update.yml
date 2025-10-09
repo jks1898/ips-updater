@@ -12,7 +12,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # 确保获取完整 git 历史，方便 push
+          fetch-depth: 0  # 获取完整历史，方便 rebase/push
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -39,10 +39,16 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
           git checkout main
+          
+          # 拉取最新改动并 rebase 避免冲突
+          git pull --rebase origin main
+          
+          # 检查 api.txt 是否有变动
           if ! git diff --quiet api.txt; then
             git add api.txt
             git commit -m "Update CT api.txt"
-            git push origin main
+            
+            # 自动处理可能的 push 冲突
+            git push origin main || git push origin HEAD:main --force-with-lease
           fi
