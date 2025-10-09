@@ -3,7 +3,7 @@ name: Update api.txt
 on:
   schedule:
     - cron: '0 * * * *'  # 每小时整点执行
-  workflow_dispatch:      # 手动触发
+  workflow_dispatch:      # 支持手动触发
 
 jobs:
   update:
@@ -38,19 +38,20 @@ jobs:
 
       - name: Commit and push api.txt if changed
         run: |
+          set -e  # 遇到错误立即退出
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout main
 
-          # 暂存 api.txt 改动，防止 pull 出错
-          git add api.txt
-          git stash push -m "temp" || true
-          git pull --rebase origin main
-          git stash pop || true
-
-          # 如果 api.txt 有变化，则提交
+          # 只在 api.txt 有改动时提交
           if ! git diff --quiet api.txt; then
-            git add api.txt
-            git commit -m "Update CT api.txt"
-            # 自动处理可能的 push 冲突
-            git push origin main || git push origin HEAD:main --force-with-lease
+              git add api.txt
+              git commit -m "Update CT api.txt"
+
+              # 拉取远程最新，避免 push 冲突
+              git pull --rebase origin main || true
+
+              # push，失败时使用安全 force
+              git push origin main || git push origin HEAD:main --force-with-lease
+          fi
