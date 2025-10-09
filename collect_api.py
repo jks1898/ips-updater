@@ -6,14 +6,12 @@ URL_164746 = "https://ip.164746.xyz/"
 URL_WETEST = "https://www.wetest.vip/page/cloudflare/total_v4.html"
 OUTPUT = "api.txt"
 
-SPECIAL_IP = "cf.090227.xyz#官方优选"
-
 headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
 session = requests.Session()
 session.headers.update(headers)
 
 # -----------------------------
-# 抓取 ip.164746.xyz（优先取前3）
+# 抓取 ip.164746.xyz（最多取3个）
 # -----------------------------
 resp_164746 = session.get(URL_164746, timeout=10)
 resp_164746.encoding = resp_164746.apparent_encoding
@@ -36,30 +34,25 @@ for row in soup.select("table tr")[1:]:
 top_164746 = [ip for ip, _ in sorted(data_164746, key=lambda x: x[1])[:3]]
 
 # -----------------------------
-# 抓取 wetest.vip（取前6）
+# 抓取 wetest.vip（最多取3个）
 # -----------------------------
 resp_wetest = session.get(URL_WETEST, timeout=10)
 resp_wetest.encoding = resp_wetest.apparent_encoding
 
 pattern_wetest = re.compile(r"(\d{1,3}(?:\.\d{1,3}){3}).*?电信.*?(\d+)\s*毫秒", re.S)
 data_wetest = [(ip, int(lat)) for ip, lat in pattern_wetest.findall(resp_wetest.text)]
-top_wetest = [ip for ip, _ in sorted(data_wetest, key=lambda x: x[1])[:6]]
+top_wetest_sorted = [ip for ip, _ in sorted(data_wetest, key=lambda x: x[1])]
 
 # -----------------------------
-# 合并逻辑
+# 合并逻辑，总数6
 # -----------------------------
-final_ips = top_164746 + top_wetest
+final_ips = top_164746.copy()
 
-# 如果 ip.164746.xyz 不足3个，从 wetest 补足
-if len(final_ips) < 9:
-    extra_needed = 9 - len(final_ips)
-    all_wetest_ips = [ip for ip, _ in sorted(data_wetest, key=lambda x: x[1])]
-    for ip in all_wetest_ips:
-        if ip not in final_ips and len(final_ips) < 9:
-            final_ips.append(ip)
-
-# 第10个固定
-final_ips.append("cf.090227.xyz")
+needed = 6 - len(final_ips)
+for ip in top_wetest_sorted:
+    if ip not in final_ips and needed > 0:
+        final_ips.append(ip)
+        needed -= 1
 
 # -----------------------------
 # 写入文件
