@@ -2,9 +2,7 @@ name: Update api.txt
 
 on:
   schedule:
-    # 每 2 小时错峰执行
-    - cron: '15 */2 * * *'
-  workflow_dispatch: # 手动触发
+    - cron: '0 * * * *'  # 每小时整点执行
 
 jobs:
   update:
@@ -13,6 +11,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # 确保获取完整 git 历史，方便 push
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -33,14 +33,16 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run IP collection script
-        run: python collect_api.py  # 运行 collect_api.py
+        run: python collect_api.py
 
       - name: Commit and push api.txt if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git diff --exit-code api.txt || (
+          git fetch origin main
+          git checkout main
+          if ! git diff --quiet api.txt; then
             git add api.txt
             git commit -m "Update CT api.txt"
-            git push
-          )
+            git push origin main
+          fi
