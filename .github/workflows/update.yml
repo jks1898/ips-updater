@@ -3,6 +3,7 @@ name: Update api.txt
 on:
   schedule:
     - cron: '0 * * * *'  # 每小时整点执行
+  workflow_dispatch:      # 手动触发
 
 jobs:
   update:
