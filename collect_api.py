@@ -10,14 +10,15 @@ headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
 session = requests.Session()
 session.headers.update(headers)
 
+all_data = []
+
 # -----------------------------
-# 抓取 ip.164746.xyz（最多取3个）
+# 抓取 ip.164746.xyz
 # -----------------------------
 resp_164746 = session.get(URL_164746, timeout=10)
 resp_164746.encoding = resp_164746.apparent_encoding
 soup = BeautifulSoup(resp_164746.text, "html.parser")
 
-data_164746 = []
 for row in soup.select("table tr")[1:]:
     cols = row.find_all("td")
     if len(cols) < 5:
@@ -27,32 +28,24 @@ for row in soup.select("table tr")[1:]:
         continue
     try:
         latency = float(cols[4].text.strip())
-        data_164746.append((ip, latency))
+        all_data.append((ip, latency))
     except:
         continue
 
-top_164746 = [ip for ip, _ in sorted(data_164746, key=lambda x: x[1])[:3]]
-
 # -----------------------------
-# 抓取 wetest.vip（最多取3个）
+# 抓取 wetest.vip（电信节点）
 # -----------------------------
 resp_wetest = session.get(URL_WETEST, timeout=10)
 resp_wetest.encoding = resp_wetest.apparent_encoding
 
 pattern_wetest = re.compile(r"(\d{1,3}(?:\.\d{1,3}){3}).*?电信.*?(\d+)\s*毫秒", re.S)
-data_wetest = [(ip, int(lat)) for ip, lat in pattern_wetest.findall(resp_wetest.text)]
-top_wetest_sorted = [ip for ip, _ in sorted(data_wetest, key=lambda x: x[1])]
+for ip, lat in pattern_wetest.findall(resp_wetest.text):
+    all_data.append((ip, int(lat)))
 
 # -----------------------------
-# 合并逻辑，总数6
+# 按延迟排序，取前8
 # -----------------------------
-final_ips = top_164746.copy()
-
-needed = 6 - len(final_ips)
-for ip in top_wetest_sorted:
-    if ip not in final_ips and needed > 0:
-        final_ips.append(ip)
-        needed -= 1
+final_ips = [ip for ip, _ in sorted(all_data, key=lambda x: x[1])[:8]]
 
 # -----------------------------
 # 写入文件
