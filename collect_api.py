@@ -52,8 +52,8 @@ final_ips = [ip for ip, _ in sorted(all_data, key=lambda x: x[1])[:8]]
 # -----------------------------
 with open(OUTPUT, "w", encoding="utf-8") as f:
     for ip in final_ips:
-        f.write(f"{ip}#官方优选\n")
+        f.write(f"{ip}#官方\n")
 
 print("成功生成 IP 列表：")
 for i, ip in enumerate(final_ips, start=1):
-    print(f"{i}. {ip}#官方优选")
+    print(f"{i}. {ip}#官方")
