@@ -31,12 +31,12 @@ top_ips = [ip for ip, _ in sorted(all_data, key=lambda x: x[1])[:7]]
 final_ips = top_ips + ["youxuan.cf.090227.xyz"]
 
 # -----------------------------
-# 写入文件
+# 写入文件，备注改为 #CT
 # -----------------------------
 with open(OUTPUT, "w", encoding="utf-8") as f:
     for ip in final_ips:
-        f.write(f"{ip}#官方\n")
+        f.write(f"{ip}#CT\n")
 
 print("成功生成 IP 列表：")
 for i, ip in enumerate(final_ips, start=1):
-    print(f"{i}. {ip}#官方")
+    print(f"{i}. {ip}#CT")
