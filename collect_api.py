@@ -1,8 +1,6 @@
 import requests
-from bs4 import BeautifulSoup
 import re
 
-URL_164746 = "https://ip.164746.xyz/"
 URL_WETEST = "https://www.wetest.vip/page/cloudflare/total_v4.html"
 OUTPUT = "api.txt"
 
@@ -11,26 +9,6 @@ session = requests.Session()
 session.headers.update(headers)
 
 all_data = []
-
-# -----------------------------
-# 抓取 ip.164746.xyz
-# -----------------------------
-resp_164746 = session.get(URL_164746, timeout=10)
-resp_164746.encoding = resp_164746.apparent_encoding
-soup = BeautifulSoup(resp_164746.text, "html.parser")
-
-for row in soup.select("table tr")[1:]:
-    cols = row.find_all("td")
-    if len(cols) < 5:
-        continue
-    ip = cols[0].text.strip().lstrip("★").strip()
-    if not ip:
-        continue
-    try:
-        latency = float(cols[4].text.strip())
-        all_data.append((ip, latency))
-    except:
-        continue
 
 # -----------------------------
 # 抓取 wetest.vip（电信节点）
@@ -43,9 +21,14 @@ for ip, lat in pattern_wetest.findall(resp_wetest.text):
     all_data.append((ip, int(lat)))
 
 # -----------------------------
-# 按延迟排序，取前8
+# 按延迟排序，取前7
 # -----------------------------
-final_ips = [ip for ip, _ in sorted(all_data, key=lambda x: x[1])[:8]]
+top_ips = [ip for ip, _ in sorted(all_data, key=lambda x: x[1])[:7]]
+
+# -----------------------------
+# 固定 youxuan.cf.090227.xyz 为第一个
+# -----------------------------
+final_ips = ["youxuan.cf.090227.xyz"] + top_ips
 
 # -----------------------------
 # 写入文件
