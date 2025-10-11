@@ -26,9 +26,9 @@ for ip, lat in pattern_wetest.findall(resp_wetest.text):
 top_ips = [ip for ip, _ in sorted(all_data, key=lambda x: x[1])[:7]]
 
 # -----------------------------
-# 固定 youxuan.cf.090227.xyz 为第一个
+# 固定 youxuan.cf.090227.xyz 为最后一个
 # -----------------------------
-final_ips = ["youxuan.cf.090227.xyz"] + top_ips
+final_ips = top_ips + ["youxuan.cf.090227.xyz"]
 
 # -----------------------------
 # 写入文件
