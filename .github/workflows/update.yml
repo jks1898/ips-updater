@@ -1,9 +1,7 @@
 name: Update api.txt
 
 on:
-  workflow_dispatch:   # 手动触发
-  schedule:
-    - cron: '5 * * * *'  # 北京时间每小时第5分钟
+  workflow_dispatch:  # 只通过 Worker 触发
 
 jobs:
   update:
@@ -11,12 +9,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.13'
 
@@ -31,10 +29,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install -r requirements.txt
 
-      - name: Run Python script
-        run: python $GITHUB_WORKSPACE/ips.py   # 使用绝对路径
+      - name: Run IP collection script
+        run: python ips.py
 
       - name: Commit and push api.txt if changed
         run: |
@@ -42,9 +40,17 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout main
+
           if ! git diff --quiet api.txt; then
               git add api.txt
-              git commit -m "Auto update api.txt"
+              git commit -m "Update CT api.txt"
               git pull --rebase origin main || true
               git push origin main || git push origin HEAD:main --force-with-lease
           fi
+
+      - name: Debug info
+        if: ${{ always() }}
+        run: |
+          echo "UTC time: $(date -u)"
+          echo "Beijing time: $(date -d '+8 hour')"
+          echo "Branch: $(git branch --show-current)"
