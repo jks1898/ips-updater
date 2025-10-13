@@ -1,7 +1,7 @@
 name: Update api.txt
 
 on:
-  workflow_dispatch:  # 只通过 Worker 触发
+  workflow_dispatch:  # 仅由 Worker 触发
 
 jobs:
   update:
