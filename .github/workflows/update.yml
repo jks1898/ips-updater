@@ -1,11 +1,7 @@
 name: Update api.txt
 
 on:
-  schedule:
-    # GitHub 使用 UTC 时间，北京时间比 UTC 快 8 小时
-    # 所以要想在北京时间每小时整点执行，UTC 应该提前 8 小时执行
-    # 即 '0 * * * *' UTC == 北京时间每小时 +8h
-    - cron: '0 * * * *'  # ✅ 无需改动，就是北京时间整点
+  # 不再用 schedule，用 workflow_dispatch 让外部触发
   workflow_dispatch:
 
 jobs:
@@ -21,7 +17,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.13'  # 升级到最新稳定版
+          python-version: '3.13'  # 最新稳定版
 
       - name: Cache pip
         uses: actions/cache@v3
