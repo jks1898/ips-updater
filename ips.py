@@ -13,30 +13,26 @@ all_data = []
 # -----------------------------
 # 抓取 wetest.vip（电信节点）
 # -----------------------------
-resp_wetest = session.get(URL_WETEST, timeout=10)
-resp_wetest.encoding = resp_wetest.apparent_encoding
+resp = session.get(URL_WETEST, timeout=10)
+resp.encoding = resp.apparent_encoding
 
-pattern_wetest = re.compile(r"(\d{1,3}(?:\.\d{1,3}){3}).*?电信.*?(\d+)\s*毫秒", re.S)
-for ip, lat in pattern_wetest.findall(resp_wetest.text):
+# 匹配格式：IP + “电信” + 延迟数字 + “毫秒”
+pattern = re.compile(r"(\d{1,3}(?:\.\d{1,3}){3}).*?电信.*?(\d+)\s*毫秒", re.S)
+for ip, lat in pattern.findall(resp.text):
     all_data.append((ip, int(lat)))
 
 # -----------------------------
-# 按延迟排序，取前7
+# 按延迟排序，取前8个
 # -----------------------------
-top_ips = [ip for ip, _ in sorted(all_data, key=lambda x: x[1])[:7]]
+top_ips = [ip for ip, _ in sorted(all_data, key=lambda x: x[1])[:8]]
 
 # -----------------------------
-# 固定 youxuan.cf.090227.xyz 为最后一个
-# -----------------------------
-final_ips = top_ips + ["youxuan.cf.090227.xyz"]
-
-# -----------------------------
-# 写入文件，备注改为 #CT
+# 写入文件，备注为 #CT
 # -----------------------------
 with open(OUTPUT, "w", encoding="utf-8") as f:
-    for ip in final_ips:
+    for ip in top_ips:
         f.write(f"{ip}#CT\n")
 
 print("成功生成 IP 列表：")
-for i, ip in enumerate(final_ips, start=1):
+for i, ip in enumerate(top_ips, start=1):
     print(f"{i}. {ip}#CT")
