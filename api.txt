@@ -6,7 +6,3 @@ ct.877774.xyz:2083#CF
 cf.090227.xyz:2083#CF
 ct.877774.xyz:2087#CF
 cf.090227.xyz:2087#CF
-ns.cloudflare.com：443#CF
-ns.cloudflare.com：2053#CF
-ns.cloudflare.com：2083#CF
-ns.cloudflare.com：2087#CF
